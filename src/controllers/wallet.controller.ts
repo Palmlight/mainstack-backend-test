@@ -1,6 +1,8 @@
 import { QueryParams } from '@/@types';
+import { Currency } from '@/constants';
 import { walletService } from '@/services/wallet.service';
 import { successfulResponse } from '@/utils/response.util';
+import { DepositSchema } from '@/validations/wallet.validation';
 import { Request, Response } from 'express';
 
 class WalletController {
@@ -23,6 +25,38 @@ class WalletController {
     return successfulResponse({
       message: 'Wallets fetched successfully',
       data: wallets,
+      res,
+    });
+  }
+
+  async deposit(req: Request, res: Response) {
+    const userId = String(req.user?.id);
+    const { amount, currency } = req.body as DepositSchema;
+    const deposit = await walletService.deposit(
+      userId,
+      amount,
+      currency as Currency,
+    );
+
+    return successfulResponse({
+      message: 'Deposit successful',
+      data: deposit,
+      res,
+    });
+  }
+
+  async withdraw(req: Request, res: Response) {
+    const userId = String(req.user?.id);
+    const { amount, currency } = req.body as DepositSchema;
+    const withdraw = await walletService.withdraw(
+      userId,
+      amount,
+      currency as Currency,
+    );
+
+    return successfulResponse({
+      message: 'Withdrawal successful',
+      data: withdraw,
       res,
     });
   }

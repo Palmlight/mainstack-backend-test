@@ -1,8 +1,13 @@
-import { TransactionStatus, TransactionTypes } from '@/constants';
+import { Currency, TransactionStatus, TransactionTypes } from '@/constants';
 import { InferSchemaType, model, Schema } from 'mongoose';
 
 const TransactionLogSchema = new Schema(
   {
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
     wallet: {
       type: Schema.Types.ObjectId,
       ref: 'Wallet',
@@ -11,6 +16,11 @@ const TransactionLogSchema = new Schema(
     type: {
       type: String,
       enum: Object.values(TransactionTypes),
+      required: true,
+    },
+    currency: {
+      type: String,
+      enum: Object.values(Currency),
       required: true,
     },
     amount: {

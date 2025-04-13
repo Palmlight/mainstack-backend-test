@@ -2,7 +2,10 @@ import WalletController from '@/controllers/wallet.controller';
 import { validateData } from '@/controllers/zod.middleware';
 import authMiddleware from '@/middlewares/auth.middleware';
 import catchAsyncError from '@/middlewares/catch-async-error';
-import { GetBalanceSchema } from '@/validations/wallet.validation';
+import {
+  DepositSchema,
+  GetBalanceSchema,
+} from '@/validations/wallet.validation';
 import { Router } from 'express';
 
 const router = Router();
@@ -15,6 +18,20 @@ router.get(
   authMiddleware,
   validateData(GetBalanceSchema, 'query'),
   catchAsyncError(walletController.getBalance),
+);
+
+router.post(
+  '/deposit',
+  validateData(DepositSchema),
+  authMiddleware,
+  catchAsyncError(walletController.deposit),
+);
+
+router.post(
+  '/withdraw',
+  validateData(DepositSchema),
+  authMiddleware,
+  catchAsyncError(walletController.withdraw),
 );
 
 export { router as walletRoutes };

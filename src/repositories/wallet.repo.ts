@@ -5,6 +5,10 @@ class WalletRepo extends BaseRepo<IWallet> {
   constructor() {
     super(WalletModel);
   }
+
+  async sessionStart() {
+    return await WalletModel.startSession();
+  }
 }
 
 export default WalletRepo;

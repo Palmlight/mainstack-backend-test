@@ -1,12 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
 import { NOT_FOUND } from 'http-status';
+import { Document } from 'mongoose';
 
 export type anyObject = Record<string, unknown>;
 
 export interface ResponseParams {
   res: Response;
   message?: string;
-  data?: anyObject | anyObject[];
+  data?: anyObject | anyObject[] | Document<unknown> | null;
   statusCode?: number;
   errors?: string[] | string | anyObject | anyObject[];
 }
@@ -72,12 +73,20 @@ export const appErrorHandler = (
   res.status(err.statusCode || 500).json({
     status: 'error',
     message: err.message || 'Internal Server Error',
+    data: (err as any).data || undefined,
   });
 };
 
-export function createErrorObject(message: string, statusCode: number): Error {
+export function createErrorObject(
+  message: string,
+  statusCode: number,
+  data?: any,
+): Error {
   const error = new Error();
   error.message = message;
   (error as any).statusCode = statusCode;
+  if (data) {
+    (error as any).data = data;
+  }
   return error;
 }
