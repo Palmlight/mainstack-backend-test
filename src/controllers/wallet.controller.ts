@@ -1,9 +1,10 @@
 import { QueryParams } from '@/@types';
 import { Currency } from '@/constants';
 import { walletService } from '@/services/wallet.service';
-import { successfulResponse } from '@/utils/response.util';
-import { DepositSchema } from '@/validations/wallet.validation';
+import { createErrorObject, successfulResponse } from '@/utils/response.util';
+import { DepositSchema, TransferSchema } from '@/validations/wallet.validation';
 import { Request, Response } from 'express';
+import { BAD_REQUEST } from 'http-status';
 
 class WalletController {
   async getBalance(req: Request, res: Response) {
@@ -57,6 +58,34 @@ class WalletController {
     return successfulResponse({
       message: 'Withdrawal successful',
       data: withdraw,
+      res,
+    });
+  }
+
+  async transfer(req: Request, res: Response) {
+    const userId = String(req.user?.id);
+    const username = String(req.user?.username);
+    const {
+      amount,
+      currency,
+      username: recipientUsername,
+    } = req.body as TransferSchema;
+
+    if (username === recipientUsername) {
+      throw createErrorObject("You can't transfer to yourself", BAD_REQUEST);
+    }
+
+    const transfer = await walletService.transferFunds({
+      amount,
+      currency: currency as Currency,
+      recipientUsername,
+      userId,
+      username,
+    });
+
+    return successfulResponse({
+      message: 'Transfer successful',
+      data: transfer,
       res,
     });
   }

@@ -5,6 +5,7 @@ import catchAsyncError from '@/middlewares/catch-async-error';
 import {
   DepositSchema,
   GetBalanceSchema,
+  TransferSchema,
 } from '@/validations/wallet.validation';
 import { Router } from 'express';
 
@@ -32,6 +33,13 @@ router.post(
   validateData(DepositSchema),
   authMiddleware,
   catchAsyncError(walletController.withdraw),
+);
+
+router.post(
+  '/transfer',
+  validateData(TransferSchema),
+  authMiddleware,
+  catchAsyncError(walletController.transfer),
 );
 
 export { router as walletRoutes };
