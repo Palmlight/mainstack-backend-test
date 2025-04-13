@@ -14,7 +14,8 @@
       "@middlewares/*": ["src/middlewares/*"],
       "@config/*": ["src/config/*"],
       "@repos/*": ["src/repositories/*"],
-      "@validations/*": ["src/validations/*"]
+      "@validations/*": ["src/validations/*"],
+      "@constants": ["src/constants/*"]
     },
     "typeRoots": ["src/@types", "./node_modules/@types"],
     "outDir": "./dist",

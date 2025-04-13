@@ -30,13 +30,9 @@ class UserController {
     const userId = String(req.user?.id);
     await userService.changePassword(req.body, userId);
 
-    console.log(req);
     return successfulResponse({
       message: 'Password changed successfully',
       res,
-      data: {
-        // ...req?.user,
-      },
       statusCode: OK,
     });
   }

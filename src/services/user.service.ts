@@ -1,4 +1,6 @@
+import { Currency } from '@/constants';
 import UserRepo from '@/repositories/user.repo';
+import WalletRepo from '@/repositories/wallet.repo';
 import { comparePassword, hashValue } from '@/utils/hash.util';
 import { generateJWTToken } from '@/utils/jwt.util';
 import { createErrorObject } from '@/utils/response.util';
@@ -11,9 +13,11 @@ import { BAD_REQUEST, CONFLICT } from 'http-status';
 
 class UserService {
   private userRepo: UserRepo;
+  private walletRepo: WalletRepo;
 
   constructor() {
     this.userRepo = new UserRepo();
+    this.walletRepo = new WalletRepo();
   }
 
   async register(data: CreateUserSchema) {
@@ -31,6 +35,15 @@ class UserService {
       ...data,
       password,
     });
+
+    await Promise.all(
+      Object.values(Currency).map((currency) =>
+        this.walletRepo.insertOne({
+          user: user._id,
+          currency,
+        }),
+      ),
+    );
 
     const token = await generateJWTToken({
       id: user._id,
