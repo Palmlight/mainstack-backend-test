@@ -8,6 +8,8 @@ import { Router } from 'express';
 const router = Router();
 const walletController = new WalletController();
 
+router.get('/', authMiddleware, catchAsyncError(walletController.getWallets));
+
 router.get(
   '/balance',
   authMiddleware,

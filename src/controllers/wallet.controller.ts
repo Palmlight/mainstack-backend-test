@@ -15,6 +15,17 @@ class WalletController {
       res,
     });
   }
+
+  async getWallets(req: Request, res: Response) {
+    const userId = String(req.user?.id);
+    const wallets = await walletService.getWallets(userId);
+
+    return successfulResponse({
+      message: 'Wallets fetched successfully',
+      data: wallets,
+      res,
+    });
+  }
 }
 
 export default WalletController;

@@ -6,7 +6,7 @@ export type anyObject = Record<string, unknown>;
 export interface ResponseParams {
   res: Response;
   message?: string;
-  data?: anyObject;
+  data?: anyObject | anyObject[];
   statusCode?: number;
   errors?: string[] | string | anyObject | anyObject[];
 }
