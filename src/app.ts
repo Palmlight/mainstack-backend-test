@@ -1,9 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import config from './config/config';
-import { loadRoutes } from './routes/base.routes';
-
+import config from '@/config/config';
+import { loadRoutes } from '@/routes/base.routes';
 const app = express();
 
 app.use(express.json());

@@ -8,6 +8,7 @@ export interface ResponseParams {
   message?: string;
   data?: anyObject;
   statusCode?: number;
+  errors?: string[] | string | anyObject | anyObject[];
 }
 
 export interface AppError extends Error {
@@ -32,10 +33,12 @@ export const errorResponse = ({
   res,
   message,
   statusCode = 500,
+  errors,
 }: ResponseParams) => {
   res.status(statusCode).json({
     status: 'error',
     message: message,
+    errors: errors,
   });
 };
 
@@ -71,3 +74,10 @@ export const appErrorHandler = (
     message: err.message || 'Internal Server Error',
   });
 };
+
+export function createErrorObject(message: string, statusCode: number): Error {
+  const error = new Error();
+  error.message = message;
+  (error as any).statusCode = statusCode;
+  return error;
+}

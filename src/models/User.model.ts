@@ -12,6 +12,7 @@ const UserSchema = new Schema(
       unique: true,
       trim: true,
       lowercase: true,
+      index: true,
     },
     password: {
       type: String,
@@ -21,8 +22,6 @@ const UserSchema = new Schema(
   },
   { timestamps: true },
 );
-
-UserSchema.index({ username: 1 });
 
 export type IUser = InferSchemaType<typeof UserSchema>;
 

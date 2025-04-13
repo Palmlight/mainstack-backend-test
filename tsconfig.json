@@ -2,7 +2,8 @@
   "compilerOptions": {
     "target": "es2016",
     "module": "commonjs",
-    "baseUrl": "./",
+    "moduleResolution": "node",
+    "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
       "@controllers/*": ["src/controllers/*"],
@@ -14,12 +15,15 @@
       "@config/*": ["src/config/*"],
       "@repos/*": ["src/repositories/*"],
       "@validations/*": ["src/validations/*"]
-      // "@tests/*": ["src/tests/*"],
     },
+    "typeRoots": ["src/@types", "./node_modules/@types"],
     "outDir": "./dist",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "skipLibCheck": true
-  }
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": false
+  },
+  "include": ["src", "src/@types"]
 }
