@@ -177,4 +177,54 @@ describe('WalletController', () => {
       });
     });
   });
+
+  describe('getTransactions', () => {
+    it('should fetch transactions successfully', async () => {
+      const req = {
+        user: { id: 'user-123' },
+        query: { type: 'credit' },
+      } as any;
+
+      const mockTransactions = [
+        { id: 'txn-1', type: 'credit', amount: 100 },
+        { id: 'txn-2', type: 'debit', amount: 50 },
+      ];
+
+      (walletService.getTransactionHistory as jest.Mock).mockResolvedValue(
+        mockTransactions,
+      );
+
+      await controller.getTransactions(req, mockRes);
+
+      expect(walletService.getTransactionHistory).toHaveBeenCalledWith(
+        'user-123',
+        { type: 'credit' },
+      );
+      expect(successfulResponse).toHaveBeenCalledWith({
+        message: 'Transactions fetched successfully',
+        data: mockTransactions,
+        res: mockRes,
+      });
+    });
+
+    it('should handle errors when fetching transactions', async () => {
+      const req = {
+        user: { id: 'user-123' },
+        query: { type: 'credit' },
+      } as any;
+
+      (walletService.getTransactionHistory as jest.Mock).mockRejectedValue(
+        new Error('Failed to fetch transactions'),
+      );
+
+      await expect(controller.getTransactions(req, mockRes)).rejects.toThrow(
+        'Failed to fetch transactions',
+      );
+
+      expect(walletService.getTransactionHistory).toHaveBeenCalledWith(
+        'user-123',
+        { type: 'credit' },
+      );
+    });
+  });
 });

@@ -5,6 +5,7 @@ import { validateData } from '@/middlewares/zod.middleware';
 import {
   DepositSchema,
   GetBalanceSchema,
+  TransactionFilterSchema,
   TransferSchema,
 } from '@/validations/wallet.validation';
 import { Router } from 'express';
@@ -40,6 +41,13 @@ router.post(
   validateData(TransferSchema),
   authMiddleware,
   catchAsyncError(walletController.transfer),
+);
+
+router.get(
+  '/transactions',
+  validateData(TransactionFilterSchema, 'query'),
+  authMiddleware,
+  catchAsyncError(walletController.getTransactions),
 );
 
 export { router as walletRoutes };

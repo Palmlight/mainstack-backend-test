@@ -6,8 +6,8 @@
   "scripts": {
     "build": "rimraf ./dist && tsc --project tsconfig.json",
     "start": "node dist/app.js",
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node -r tsconfig-paths/register' src/app.ts",
-    "test": "jest --coverage",
+    "dev": "nodemon src/app.ts",
+    "test": "jest",
     "lint": "eslint 'src/**/*.ts'"
   },
   "keywords": [],

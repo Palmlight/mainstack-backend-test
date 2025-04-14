@@ -2,7 +2,7 @@ import { walletService } from './wallet.service';
 import WalletRepo from '../repositories/wallet.repo';
 import UserRepo from '../repositories/user.repo';
 import TransactionLogRepo from '../repositories/transactionLog.repo';
-import { Currency } from '../constants';
+import { Currency, TransactionFilters } from '../constants';
 import { createErrorObject } from '../utils/response.util';
 
 jest.mock('@/repositories/wallet.repo');
@@ -377,6 +377,59 @@ describe('WalletService', () => {
           currency,
         }),
       ).rejects.toThrow('Insufficient funds');
+    });
+  });
+
+  describe('getTransactionHistory', () => {
+    const mockTransactionLogRepo = walletService['transactionLogRepo'];
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should return transactions when found', async () => {
+      const userId = 'user-123';
+      const filters = { currency: 'USD' } as unknown as TransactionFilters;
+      const mockTransactions = [
+        { id: 'txn-1', amount: 100, currency: 'USD' },
+        { id: 'txn-2', amount: 200, currency: 'USD' },
+      ];
+
+      mockTransactionLogRepo.find = jest
+        .fn()
+        .mockResolvedValue(mockTransactions);
+
+      const result = await walletService.getTransactionHistory(userId, filters);
+
+      expect(mockTransactionLogRepo.find).toHaveBeenCalledWith(
+        { user: userId, ...filters },
+        {},
+      );
+      expect(result).toEqual(mockTransactions);
+    });
+
+    it('should throw an error if no transactions are found', async () => {
+      const userId = 'user-123';
+      const filters = { currency: 'USD' } as unknown as TransactionFilters;
+
+      mockTransactionLogRepo.find = jest.fn().mockResolvedValue([]);
+
+      (createErrorObject as jest.Mock).mockImplementation(
+        (message, statusCode) => {
+          const error = new Error(message) as any;
+          error.statusCode = statusCode;
+          throw error;
+        },
+      );
+
+      await expect(
+        walletService.getTransactionHistory(userId, filters),
+      ).rejects.toThrow('No transactions found');
+
+      expect(mockTransactionLogRepo.find).toHaveBeenCalledWith(
+        { user: userId, ...filters },
+        {},
+      );
     });
   });
 });

@@ -1,5 +1,5 @@
 import { QueryParams } from '@/@types';
-import { Currency } from '@/constants';
+import { Currency, TransactionFilters } from '@/constants';
 import { walletService } from '@/services/wallet.service';
 import { createErrorObject, successfulResponse } from '@/utils/response.util';
 import { DepositSchema, TransferSchema } from '@/validations/wallet.validation';
@@ -86,6 +86,20 @@ class WalletController {
     return successfulResponse({
       message: 'Transfer successful',
       data: transfer,
+      res,
+    });
+  }
+
+  async getTransactions(req: Request, res: Response) {
+    const userId = String(req.user?.id);
+    const transactions = await walletService.getTransactionHistory(
+      userId,
+      req.query as unknown as TransactionFilters,
+    );
+
+    return successfulResponse({
+      message: 'Transactions fetched successfully',
+      data: transactions,
       res,
     });
   }

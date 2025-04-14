@@ -1,4 +1,4 @@
-import { Currency } from '@/constants';
+import { Currency, TransactionTypes } from '@/constants';
 import { z } from 'zod';
 import { UsernameSchema } from './user.validations';
 
@@ -21,3 +21,16 @@ export const TransferSchema = z.object({
 });
 
 export type TransferSchema = z.infer<typeof TransferSchema>;
+
+export const TransactionFilterSchema = z
+  .object({
+    type: z
+      .enum(Object.values(TransactionTypes) as [string, ...string[]])
+      .optional(),
+    currency: z
+      .enum(Object.values(Currency) as [string, ...string[]])
+      .optional(),
+  })
+  .strict();
+
+export type TransactionFilterSchema = z.infer<typeof TransactionFilterSchema>;

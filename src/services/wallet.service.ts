@@ -1,8 +1,13 @@
-import { Currency, TransactionStatus, TransactionTypes } from '@/constants';
+import {
+  Currency,
+  TransactionFilters,
+  TransactionStatus,
+  TransactionTypes,
+} from '@/constants';
 import TransactionLogRepo from '@/repositories/transactionLog.repo';
 import UserRepo from '@/repositories/user.repo';
 import WalletRepo from '@/repositories/wallet.repo';
-import { createErrorObject } from '@/utils/response.util';
+import { anyObject, createErrorObject } from '@/utils/response.util';
 import { BAD_REQUEST, NOT_FOUND } from 'http-status';
 
 class WalletService {
@@ -242,6 +247,24 @@ class WalletService {
 
       throw createErrorObject('Unable to complete transfer', BAD_REQUEST);
     }
+  }
+
+  async getTransactionHistory(
+    userId: string,
+    filters: TransactionFilters = {},
+  ) {
+    const query: anyObject = {
+      user: userId,
+      ...filters,
+    };
+
+    const transactions = await this.transactionLogRepo.find(query, {});
+
+    if (!transactions || transactions.length === 0) {
+      throw createErrorObject('No transactions found', NOT_FOUND);
+    }
+
+    return transactions;
   }
 }
 

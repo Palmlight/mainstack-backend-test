@@ -13,3 +13,9 @@ export enum TransactionStatus {
   SUCCESS = 'SUCCESS',
   FAILED = 'FAILED',
 }
+
+export interface TransactionFilters {
+  currency?: Currency;
+  type?: TransactionTypes;
+  status?: TransactionStatus;
+}
