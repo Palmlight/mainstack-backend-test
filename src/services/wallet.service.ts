@@ -3,7 +3,7 @@ import TransactionLogRepo from '@/repositories/transactionLog.repo';
 import UserRepo from '@/repositories/user.repo';
 import WalletRepo from '@/repositories/wallet.repo';
 import { createErrorObject } from '@/utils/response.util';
-import { BAD_REQUEST } from 'http-status';
+import { BAD_REQUEST, NOT_FOUND } from 'http-status';
 
 class WalletService {
   private userRepo: UserRepo;
@@ -34,7 +34,7 @@ class WalletService {
     );
 
     if (!wallets) {
-      throw createErrorObject('Wallets not found', BAD_REQUEST);
+      throw createErrorObject('Wallets not found', NOT_FOUND);
     }
 
     return wallets;
@@ -47,17 +47,8 @@ class WalletService {
     });
 
     if (!wallet) {
-      throw createErrorObject('Wallet not found', BAD_REQUEST);
+      throw createErrorObject('Wallet not found', NOT_FOUND);
     }
-
-    const depositLog = await this.transactionLogRepo.insertOne({
-      wallet: wallet._id,
-      user: userId,
-      type: TransactionTypes.CREDIT,
-      status: TransactionStatus.PENDING,
-      currency,
-      amount,
-    });
 
     const session = await this.walletRepo.sessionStart();
     session.startTransaction();
@@ -74,36 +65,26 @@ class WalletService {
         session,
       );
 
-      const updatedLog = await this.transactionLogRepo.findOneAndUpdate({
-        findQuery: {
-          _id: depositLog._id,
-        },
-        updateQuery: {
+      const depositLog = await this.transactionLogRepo.insertOne(
+        {
+          wallet: wallet._id,
+          user: userId,
+          type: TransactionTypes.CREDIT,
           status: TransactionStatus.SUCCESS,
+          currency,
+          amount,
         },
-        session: session,
-      });
+        session,
+      );
 
       await session.commitTransaction();
       session.endSession();
-      return updatedLog;
+      return depositLog;
     } catch (error) {
       await session.abortTransaction();
       session.endSession();
 
-      const updatedLog = await this.transactionLogRepo.findOneAndUpdate({
-        findQuery: { _id: depositLog._id },
-        updateQuery: {
-          status: TransactionStatus.FAILED,
-          errorMessage: 'Unable to complete deposit',
-        },
-      });
-
-      throw createErrorObject(
-        'Unable to complete deposit',
-        BAD_REQUEST,
-        updatedLog,
-      );
+      throw createErrorObject('Unable to complete deposit', BAD_REQUEST);
     }
   }
 
@@ -114,21 +95,12 @@ class WalletService {
     });
 
     if (!wallet) {
-      throw createErrorObject('Wallet not found', BAD_REQUEST);
+      throw createErrorObject('Wallet not found', NOT_FOUND);
     }
 
     if (wallet.balance < amount) {
       throw createErrorObject('Insufficient funds', BAD_REQUEST);
     }
-
-    const withdrawLog = await this.transactionLogRepo.insertOne({
-      wallet: wallet._id,
-      user: userId,
-      type: TransactionTypes.DEBIT,
-      status: TransactionStatus.PENDING,
-      currency,
-      amount,
-    });
 
     const session = await this.walletRepo.sessionStart();
     session.startTransaction();
@@ -143,34 +115,27 @@ class WalletService {
         session,
       );
 
-      const updatedLog = await this.transactionLogRepo.findOneAndUpdate({
-        findQuery: {
-          _id: withdrawLog._id,
-        },
-        updateQuery: {
+      const withdrawLog = await this.transactionLogRepo.insertOne(
+        {
+          wallet: wallet._id,
+          user: userId,
+          type: TransactionTypes.DEBIT,
           status: TransactionStatus.SUCCESS,
+          currency,
+          amount,
         },
         session,
-      });
+      );
       await session.commitTransaction();
       session.endSession();
-      return updatedLog;
+      return withdrawLog;
     } catch (error) {
       await session.abortTransaction();
       session.endSession();
 
-      const updatedLog = await this.transactionLogRepo.findOneAndUpdate({
-        findQuery: { _id: withdrawLog._id },
-        updateQuery: {
-          status: TransactionStatus.FAILED,
-          errorMessage: 'Unable to complete withdrawal',
-        },
-      });
-
       throw createErrorObject(
-        'Unable to complete withdrawal',
+        'Unable to process withdrawal request',
         BAD_REQUEST,
-        updatedLog,
       );
     }
   }
@@ -193,7 +158,7 @@ class WalletService {
     });
 
     if (!recipient) {
-      throw createErrorObject('Recipient not found', BAD_REQUEST);
+      throw createErrorObject('Recipient not found', NOT_FOUND);
     }
 
     const recipientWallet = await this.walletRepo.findOne({
@@ -202,7 +167,7 @@ class WalletService {
     });
 
     if (!recipientWallet) {
-      throw createErrorObject('Recipient wallet not found', BAD_REQUEST);
+      throw createErrorObject('Recipient wallet not found', NOT_FOUND);
     }
 
     const senderWallet = await this.walletRepo.findOne({
@@ -211,25 +176,12 @@ class WalletService {
     });
 
     if (!senderWallet) {
-      throw createErrorObject('Wallet not found', BAD_REQUEST);
+      throw createErrorObject('Wallet not found', NOT_FOUND);
     }
 
     if (senderWallet.balance < amount) {
       throw createErrorObject('Insufficient funds', BAD_REQUEST);
     }
-
-    const transferLog = await this.transactionLogRepo.insertOne({
-      wallet: senderWallet._id,
-      user: userId,
-      type: TransactionTypes.DEBIT,
-      status: TransactionStatus.PENDING,
-      currency,
-      amount,
-      meta: {
-        recipientUsername: recipient.username,
-        recipientWallet: recipientWallet._id,
-      },
-    });
 
     const session = await this.walletRepo.sessionStart();
     session.startTransaction();
@@ -252,14 +204,17 @@ class WalletService {
         session,
       );
 
-      const updatedLog = await this.transactionLogRepo.findOneAndUpdate({
-        findQuery: {
-          _id: transferLog._id,
+      const transferLog = await this.transactionLogRepo.insertOne({
+        wallet: senderWallet._id,
+        user: userId,
+        type: TransactionTypes.DEBIT,
+        status: TransactionStatus.SUCCESS,
+        currency,
+        amount,
+        meta: {
+          recipientUsername: recipient.username,
+          recipientWallet: recipientWallet._id,
         },
-        updateQuery: {
-          status: TransactionStatus.SUCCESS,
-        },
-        session,
       });
 
       await this.transactionLogRepo.insertOne(
@@ -280,24 +235,12 @@ class WalletService {
 
       await session.commitTransaction();
       session.endSession();
-      return updatedLog;
+      return transferLog;
     } catch (error) {
       await session.abortTransaction();
       session.endSession();
 
-      const updatedLog = await this.transactionLogRepo.findOneAndUpdate({
-        findQuery: { _id: transferLog._id },
-        updateQuery: {
-          status: TransactionStatus.FAILED,
-          errorMessage: 'Unable to complete transfer',
-        },
-      });
-
-      throw createErrorObject(
-        'Unable to complete transfer',
-        BAD_REQUEST,
-        updatedLog,
-      );
+      throw createErrorObject('Unable to complete transfer', BAD_REQUEST);
     }
   }
 }

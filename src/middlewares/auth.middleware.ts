@@ -23,7 +23,7 @@ const authMiddleware = async (
     if (!authorization) {
       return errorResponse({
         res,
-        message: 'Please login to continue',
+        message: 'Unauthorized',
         statusCode: UNAUTHORIZED,
       });
     }
