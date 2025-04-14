@@ -1,7 +1,7 @@
 import WalletController from '@/controllers/wallet.controller';
-import { validateData } from '@/controllers/zod.middleware';
 import authMiddleware from '@/middlewares/auth.middleware';
 import catchAsyncError from '@/middlewares/catch-async-error';
+import { validateData } from '@/middlewares/zod.middleware';
 import {
   DepositSchema,
   GetBalanceSchema,

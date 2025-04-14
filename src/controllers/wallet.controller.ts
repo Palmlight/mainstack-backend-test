@@ -72,7 +72,7 @@ class WalletController {
     } = req.body as TransferSchema;
 
     if (username === recipientUsername) {
-      throw createErrorObject("You can't transfer to yourself", BAD_REQUEST);
+      throw createErrorObject('Invalid transfer', BAD_REQUEST);
     }
 
     const transfer = await walletService.transferFunds({

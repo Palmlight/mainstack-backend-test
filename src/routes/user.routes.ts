@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import catchAsyncError from '@/middlewares/catch-async-error';
 import UserController from '@/controllers/user.controller';
-import { validateData } from '@/controllers/zod.middleware';
 import {
   ChangePasswordSchema,
   CreateUserSchema,
   LoginSchema,
 } from '@/validations/user.validations';
 import authMiddleware from '@/middlewares/auth.middleware';
+import { validateData } from '@/middlewares/zod.middleware';
 
 const router = Router();
 

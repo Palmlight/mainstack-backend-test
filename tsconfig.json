@@ -17,7 +17,7 @@
       "@validations/*": ["src/validations/*"],
       "@constants": ["src/constants/*"]
     },
-    "typeRoots": ["src/@types", "node_modules/@types"],
+    "typeRoots": ["node_modules/@types", "src/@types"],
     "outDir": "./dist",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
@@ -26,5 +26,6 @@
     "resolveJsonModule": true,
     "isolatedModules": false
   },
-  "include": ["src", "src/@types"]
+  "include": ["src", "src/@types"],
+  "exclude": ["**/*.test.ts", "**/*.spec.ts"]
 }
